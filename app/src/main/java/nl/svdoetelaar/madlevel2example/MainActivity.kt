@@ -3,6 +3,7 @@ package nl.svdoetelaar.madlevel2example
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
@@ -35,15 +36,33 @@ class MainActivity : AppCompatActivity() {
         binding.rvReminders.adapter = reminderAdapter
         binding.rvReminders.addItemDecoration(DividerItemDecoration(
                 this@MainActivity, DividerItemDecoration.VERTICAL))
+
+        createItemTouchHelper().attachToRecyclerView(rvReminders)
     }
 
     private fun addReminder(reminder: String) {
-        if (reminder.isNotBlank()){
+        if (reminder.isNotBlank()) {
             reminders.add(Reminder(reminder))
             reminderAdapter.notifyDataSetChanged()
-            binding.etReminder.text?.clear()
+            binding.etReminder.text.clear()
         } else {
             Snackbar.make(etReminder, "You must fill in the input field!", Snackbar.LENGTH_SHORT).show()
         }
+    }
+
+    private fun createItemTouchHelper(): ItemTouchHelper {
+        val callback = object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+            override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
+                return false
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val position = viewHolder.adapterPosition
+                reminders.removeAt(position)
+                reminderAdapter.notifyDataSetChanged()
+            }
+        }
+
+        return ItemTouchHelper(callback)
     }
 }
